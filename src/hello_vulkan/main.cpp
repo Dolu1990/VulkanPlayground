@@ -106,11 +106,6 @@ public:
     std::vector<VkImageView> swapChainImageViews;
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
-    VkRenderPass renderPass;
-    VkDescriptorSetLayout descriptorSetLayout;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
-
     VkCommandPool commandPool;
 
     VkImage depthImage;
@@ -149,15 +144,11 @@ public:
         createLogicalDevice();
         createSwapChain();
         createImageViews();
-        createRenderPass();
         createCommandPool();
         createDepthResources();
-        createFramebuffers();
         createCommandBuffers();
         createSyncObjects();
     }
-
-    virtual void createRenderPass() = 0;
 
     void mainLoop() {
         int x = 0;
@@ -188,10 +179,6 @@ public:
     virtual void cleanup() {
         cleanupSwapChain();
 
-        vkDestroyPipeline(device, graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-        vkDestroyRenderPass(device, renderPass, nullptr);
-
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -214,7 +201,7 @@ public:
         glfwTerminate();
     }
 
-    void recreateSwapChain() {
+    virtual void recreateSwapChain() {
         int width = 0, height = 0;
         glfwGetFramebufferSize(window, &width, &height);
         while (width == 0 || height == 0) {
@@ -228,8 +215,6 @@ public:
 
         createSwapChain();
         createImageViews();
-        createDepthResources();
-        createFramebuffers();
     }
 
     void createInstance() {
@@ -426,7 +411,7 @@ public:
         }
     }
 
-    void createFramebuffers() {
+    void createFramebuffers(VkRenderPass renderPass) {
         swapChainFramebuffers.resize(swapChainImageViews.size());
 
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
@@ -674,7 +659,6 @@ public:
     }
 
     virtual void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) = 0;
-    virtual void updateUniformBuffer(uint32_t currentImage) = 0;
 
     void drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -688,8 +672,6 @@ public:
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
-
-        updateUniformBuffer(currentFrame);
 
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
@@ -981,6 +963,11 @@ public:
     HelloTriangleApplication(){}
     virtual ~HelloTriangleApplication(){}
 
+    VkRenderPass renderPass;
+    VkDescriptorSetLayout descriptorSetLayout;
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
+
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
@@ -1002,6 +989,8 @@ public:
     void initVulkan() override {
         WindowVulkan::initVulkan();
         createDescriptorSetLayout();
+        createRenderPass();
+        createFramebuffers(renderPass);
         createGraphicsPipeline();
         createTextureImage();
         createTextureImageView();
@@ -1015,6 +1004,10 @@ public:
 
 
     void cleanup() override {
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        vkDestroyRenderPass(device, renderPass, nullptr);
+
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device, uniformBuffers[i], nullptr);
             vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
@@ -1039,7 +1032,7 @@ public:
         WindowVulkan::cleanup();
     }
 
-    void createRenderPass() override {
+    void createRenderPass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -1244,6 +1237,12 @@ public:
 
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    }
+
+    virtual void recreateSwapChain(){
+        WindowVulkan::recreateSwapChain();
+        createDepthResources();
+        createFramebuffers(renderPass);
     }
 
     void createTextureImage() {
@@ -1493,6 +1492,8 @@ public:
     }
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) override {
+        updateUniformBuffer(currentFrame);
+
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -1550,7 +1551,7 @@ public:
     }
 
 
-    void updateUniformBuffer(uint32_t currentImage) override {
+    void updateUniformBuffer(uint32_t currentImage) {
         static auto startTime = std::chrono::high_resolution_clock::now();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
