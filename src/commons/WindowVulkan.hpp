@@ -64,6 +64,11 @@ public:
     WindowVulkan();
     virtual ~WindowVulkan();
 
+    virtual void initVulkan();
+    virtual void cleanup();
+    virtual void recreateSwapChain();
+    virtual void fillCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) = 0;
+
     GLFWwindow* window;
 
     VkInstance instance;
@@ -101,11 +106,10 @@ public:
     void initWindow() ;
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
-    virtual void initVulkan();
+
+
     void mainLoop();
     void cleanupSwapChain();
-    virtual void cleanup();
-    virtual void recreateSwapChain();
     void createInstance();
 
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
@@ -147,7 +151,6 @@ public:
 
     void createSyncObjects();
 
-    virtual void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) = 0;
 
     void drawFrame();
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);

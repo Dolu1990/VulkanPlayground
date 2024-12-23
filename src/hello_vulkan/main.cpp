@@ -618,7 +618,7 @@ public:
         }
     }
 
-    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) override {
+    void fillCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) override {
         updateUniformBuffer(currentFrame);
 
         VkCommandBufferBeginInfo beginInfo{};

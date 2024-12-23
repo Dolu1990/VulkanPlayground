@@ -1,2 +1,3 @@
+add_subdirectory(commons)
 add_subdirectory(hello_world)
 add_subdirectory(hello_vulkan)

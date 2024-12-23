@@ -1,7 +1,7 @@
 vulkan_base()
 
-add_executable ( hello_vulkan main.cpp WindowVulkan.cpp)
-target_link_libraries ( hello_vulkan Vulkan::Vulkan glfw )
+add_executable ( hello_vulkan main.cpp)
+target_link_libraries ( hello_vulkan Vulkan::Vulkan glfw commons)
 target_include_directories (hello_vulkan PRIVATE ${STB_INCLUDEDIR})
 add_dependencies(hello_vulkan default_frag default_vert)
 
