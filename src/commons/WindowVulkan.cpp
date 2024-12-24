@@ -124,6 +124,7 @@ void WindowVulkan::recreateSwapChain() {
 
     createSwapChain();
     createImageViews();
+    createDepthResources();
 }
 
 void WindowVulkan::createInstance() {

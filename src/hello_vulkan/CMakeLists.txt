@@ -1,9 +1,12 @@
 vulkan_base()
 
-add_executable ( hello_vulkan main.cpp)
-target_link_libraries ( hello_vulkan Vulkan::Vulkan glfw commons)
-target_include_directories (hello_vulkan PRIVATE ${STB_INCLUDEDIR})
-add_dependencies(hello_vulkan default_frag default_vert)
+set(TARGET hello_vulkan)
+add_executable (${TARGET} main.cpp)
+target_link_libraries (${TARGET} Vulkan::Vulkan glfw commons)
+target_include_directories (${TARGET} PRIVATE ${STB_INCLUDEDIR})
+add_dependencies(${TARGET} default_frag default_vert)
+
+target_include_directories(${TARGET} PRIVATE "../tinygltf")
 
 #set(TEXTURES ${CMAKE_SOURCE_DIR}/images/texture.jpg)
 #set(SHADERS ${CMAKE_SOURCE_DIR}/shaders/default.frag.spv ${CMAKE_SOURCE_DIR}/shaders/default.vert.spv)
