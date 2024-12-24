@@ -60,10 +60,15 @@ void WindowVulkan::initVulkan() {
 }
 
 void WindowVulkan::mainLoop() {
-    int x = 0;
+    auto lastTime = std::chrono::high_resolution_clock::now();
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+        tick(deltaTime);
         drawFrame();
+        lastTime = currentTime;
     }
 
     vkDeviceWaitIdle(device);

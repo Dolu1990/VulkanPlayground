@@ -68,6 +68,7 @@ public:
     virtual void cleanup();
     virtual void recreateSwapChain();
     virtual void fillCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) = 0;
+    virtual void tick(float dt) = 0;
 
     GLFWwindow* window;
 
