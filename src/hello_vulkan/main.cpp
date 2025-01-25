@@ -114,21 +114,25 @@ public:
 
     float spin = 0;
 
-
     void initVulkan() override {
         WindowVulkan::initVulkan();
-        createDescriptorSetLayout();
-        createRenderPass();
-        createFramebuffers(renderPass);
-        createGraphicsPipeline();
+        
+        createUniformBuffers();
+
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
-        createVertexBuffer();
-        createIndexBuffer();
-        createUniformBuffers();
+
+        createDescriptorSetLayout();
         createDescriptorPool();
         createDescriptorSets();
+
+        createRenderPass();
+        createFramebuffers(renderPass);
+        createGraphicsPipeline();
+
+        createVertexBuffer();
+        createIndexBuffer();
     }
 
 
@@ -267,8 +271,8 @@ public:
     }
 
     void createGraphicsPipeline() {
-        auto vertShaderCode = readFile("shaders/default.vert.spv");
-        auto fragShaderCode = readFile("shaders/default.frag.spv");
+        auto vertShaderCode = readFile("/media/data2/proj/game/VulkanPlayground/shaders/default.vert.spv");
+        auto fragShaderCode = readFile("/media/data2/proj/game/VulkanPlayground/shaders/default.frag.spv");
 
         VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -412,7 +416,7 @@ public:
 
     void createTextureImage() {
         int texWidth, texHeight, texChannels;
-        stbi_uc* pixels = stbi_load("images/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc* pixels = stbi_load("/media/data2/proj/game/VulkanPlayground/images/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
         if (!pixels) {
